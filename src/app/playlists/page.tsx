@@ -8,29 +8,35 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
 
+
 export default function PlaylistsPage() {
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const pathname = usePathname();
-    const router = useRouter();
+  const router = useRouter();
+
   useEffect(() => {
-    const fetchPlaylists = async () => {
+    const FetchPlaylists = async () => {
       try {
         setLoading(true);
+
         const res = await fetch('/api/playlists');
-        if (!res.ok) throw new Error('Authenticate First');
+        if (!res.ok) throw new Error('Failed to fetch playlists');
+        
         const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        
         setPlaylists(data);
-      } catch (err:any) {
+      } catch (err: any) {
         setError(err.message || 'An error occurred while fetching playlists');
+
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPlaylists();
-  }, []);
+    FetchPlaylists();
+  }, [router]);
 
   return (
     <div className="container mx-auto p-4">

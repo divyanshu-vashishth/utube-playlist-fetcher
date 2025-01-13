@@ -1,21 +1,42 @@
-import { youtubeService } from '@/lib/googleAuth';
-import { savePlaylistsToDB } from '@/utils/db';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { youtubeService, setAuthToken } from '@/lib/googleAuth';
 
 export async function GET() {
-  const playlists = await youtubeService.playlists.list({
-    part: ['snippet'],
-    mine: true,
-  });
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('access_token');
 
-  const playlistItems = await Promise.all(
-    playlists.data.items?.map(async (playlist) => {
-      const items = await youtubeService.playlistItems.list({
-        part: ['snippet'],
-        playlistId: playlist.id!,
-      });
-      return { playlist, items: items.data.items };
-    }) || []
-  );
-//   await savePlaylistsToDB(playlistItems);
-  return new Response(JSON.stringify(playlistItems));
+  if (!accessToken) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
+  try {
+    setAuthToken(accessToken.value);
+    
+    const response = await youtubeService.playlists.list({
+      part: ['snippet', 'contentDetails'],
+      mine: true,
+      maxResults: 50
+    });
+
+    const playlists = await Promise.all(
+      response.data.items?.map(async (playlist: any) => {
+        const items = await youtubeService.playlistItems.list({
+          part: ['snippet'],
+          playlistId: playlist.id,
+          maxResults: 50
+        });
+
+        return {
+          playlist,
+          items: items.data.items
+        };
+      }) || []
+    );
+
+    return NextResponse.json(playlists);
+  } catch (error) {
+    console.error('Error fetching playlists:', error);
+    return NextResponse.json({ error: 'Failed to fetch playlists' }, { status: 500 });
+  }
 }
