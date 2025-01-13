@@ -7,6 +7,7 @@ import { Alert } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 
 export default function PlaylistsPage() {
@@ -16,26 +17,37 @@ export default function PlaylistsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const FetchPlaylists = async () => {
-      try {
-        setLoading(true);
-
-        const res = await fetch('/api/playlists');
-        if (!res.ok) throw new Error('Failed to fetch playlists');
-        
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        
-        setPlaylists(data);
-      } catch (err: any) {
-        setError(err.message || 'An error occurred while fetching playlists');
-
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    FetchPlaylists();
+        const checkAuthAndFetchPlaylists = async () => {
+          try {
+            setLoading(true);
+            // First check authentication
+            const authCheck = await fetch('/api/auth/check');
+            const authData = await authCheck.json();
+    
+            if (!authData.authenticated) {
+              router.push('/');
+              return;
+            }
+    
+            // Then fetch playlists
+            const res = await fetch('/api/playlists');
+            if (!res.ok) throw new Error('Failed to fetch playlists');
+            
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            
+            setPlaylists(data);
+          } catch (err: any) {
+            setError(err.message || 'An error occurred while fetching playlists');
+            if (err.message.includes('Not authenticated')) {
+              router.push('/');
+            }
+          } finally {
+            setLoading(false);
+          }
+        };
+    
+        checkAuthAndFetchPlaylists();
   }, [router]);
 
   return (
@@ -58,9 +70,10 @@ export default function PlaylistsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {playlists.map((playlist) => (
             <Card key={playlist.playlist.id}>
-              <CardHeader className='max-w-sm'>
+              <CardHeader >
                 <AspectRatio ratio={16 / 9}>
-                  <img
+                  <Image
+                  
                     src={playlist.playlist.snippet.thumbnails.high.url}
                     alt={playlist.playlist.snippet.title}
                     className="w-full h-full object-cover"
@@ -72,7 +85,7 @@ export default function PlaylistsPage() {
                 {playlist.items.map((item: any) => (
                   <div key={item.id} className="mb-4">
                     <AspectRatio ratio={16 / 9}>
-                      <img
+                      <Image
                         src={item.snippet.thumbnails.high.url}
                         alt={item.snippet.title}
                         className="w-full h-full object-cover"
