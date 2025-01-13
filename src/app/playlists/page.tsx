@@ -20,7 +20,6 @@ export default function PlaylistsPage() {
         const checkAuthAndFetchPlaylists = async () => {
           try {
             setLoading(true);
-            // First check authentication
             const authCheck = await fetch('/api/auth/check');
             const authData = await authCheck.json();
     
@@ -29,12 +28,11 @@ export default function PlaylistsPage() {
               return;
             }
     
-            // Then fetch playlists
             const res = await fetch('/api/playlists');
             if (!res.ok) throw new Error('Failed to fetch playlists');
             
             const data = await res.json();
-            if (data.error) throw new Error(data.error);
+            // if (data.error) throw new Error(data.error);
             
             setPlaylists(data);
           } catch (err: any) {

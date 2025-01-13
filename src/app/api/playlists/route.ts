@@ -18,7 +18,9 @@ export async function GET() {
       return { playlist, items: items.data.items };
     }) || []
   );
-  await savePlaylistsToDB(playlistItems);
+  //  Storing in database is taking too much time in production so commenting it out
+  //  In local it works fine
+  // await savePlaylistsToDB(playlistItems);
   return NextResponse.json(playlistItems);
   } catch (error) {
     return NextResponse.json(
