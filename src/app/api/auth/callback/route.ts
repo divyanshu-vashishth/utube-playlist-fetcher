@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getTokens } from '@/lib/googleAuth';
-import { saveTokensToDB } from '@/utils/db';
+
 import { cookies } from 'next/headers'
+import { saveTokensToDB } from '@/utils/db';
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -22,7 +23,6 @@ export async function GET(req: Request) {
       // Set cookies with proper configuration
       response.cookies.set('access_token', tokens.access_token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
         maxAge: 3600 // 1 hour
