@@ -1,4 +1,5 @@
 import { youtubeService } from '@/lib/googleAuth';
+import { savePlaylistsToDB } from '@/utils/db';
 
 export async function GET() {
   const playlists = await youtubeService.playlists.list({
@@ -15,6 +16,6 @@ export async function GET() {
       return { playlist, items: items.data.items };
     }) || []
   );
-
+//   await savePlaylistsToDB(playlistItems);
   return new Response(JSON.stringify(playlistItems));
 }

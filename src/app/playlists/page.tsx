@@ -1,26 +1,90 @@
-'use client'
-import React, { useEffect, useState } from 'react';
-import PlaylistList from '@/components/PlaylistList';
+'use client';
 
-const PlaylistsPage = () => {
-  const [playlists, setPlaylists] = useState([]);
+import { useEffect, useState } from 'react';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { usePathname, useRouter } from 'next/navigation';
+import { Alert } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Button } from '@/components/ui/button';
 
+export default function PlaylistsPage() {
+  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const pathname = usePathname();
+    const router = useRouter();
   useEffect(() => {
     const fetchPlaylists = async () => {
-      const res = await fetch('/api/playlists');
-      const data = await res.json();
-      setPlaylists(data);
+      try {
+        setLoading(true);
+        const res = await fetch('/api/playlists');
+        if (!res.ok) throw new Error('Authenticate First');
+        const data = await res.json();
+        setPlaylists(data);
+      } catch (err:any) {
+        setError(err.message || 'An error occurred while fetching playlists');
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchPlaylists();
   }, []);
 
   return (
-    <div>
-      <h1>Your YouTube Playlists</h1>
-      <PlaylistList playlists={playlists} />
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Your YouTube Playlists</h1>
+      {error && <Alert variant="destructive">{error}</Alert>}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i}>
+              <Skeleton className="w-full h-48" />
+              <CardContent>
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {playlists.map((playlist) => (
+            <Card key={playlist.playlist.id}>
+              <CardHeader className='max-w-sm'>
+                <AspectRatio ratio={16 / 9}>
+                  <img
+                    src={playlist.playlist.snippet.thumbnails.high.url}
+                    alt={playlist.playlist.snippet.title}
+                    className="w-full h-full object-cover"
+                  />
+                </AspectRatio>
+                <h2 className="text-lg font-semibold mt-2">{playlist.playlist.snippet.title}</h2>
+              </CardHeader>
+              <CardContent className="flex flexx-wrap gap-4">
+                {playlist.items.map((item: any) => (
+                  <div key={item.id} className="mb-4">
+                    <AspectRatio ratio={16 / 9}>
+                      <img
+                        src={item.snippet.thumbnails.high.url}
+                        alt={item.snippet.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </AspectRatio>
+                    <h3 className="text-sm font-medium mt-2">{item.snippet.title}</h3>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+      <div className="mt-4">
+        <Button variant="outline" onClick={() => router.push('/')}>
+          Back to Home
+        </Button>
+      </div>
     </div>
   );
-};
-
-export default PlaylistsPage;
+}
