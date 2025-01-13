@@ -72,7 +72,7 @@ export default function PlaylistsPage() {
             <Card key={playlist.playlist.id}>
               <CardHeader >
                 <AspectRatio ratio={16 / 9}>
-                  <Image
+                  <img
                   
                     src={playlist.playlist.snippet.thumbnails.high.url}
                     alt={playlist.playlist.snippet.title}
@@ -81,11 +81,11 @@ export default function PlaylistsPage() {
                 </AspectRatio>
                 <h2 className="text-lg font-semibold mt-2">{playlist.playlist.snippet.title}</h2>
               </CardHeader>
-              <CardContent className="flex flexx-wrap gap-4">
+              <CardContent className="flex flex-col gap-4">
                 {playlist.items.map((item: any) => (
                   <div key={item.id} className="mb-4">
                     <AspectRatio ratio={16 / 9}>
-                      <Image
+                      <img
                         src={item.snippet.thumbnails.high.url}
                         alt={item.snippet.title}
                         className="w-full h-full object-cover"

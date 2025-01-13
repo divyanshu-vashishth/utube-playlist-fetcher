@@ -92,7 +92,7 @@ export default function ChannelPlaylistsPage() {
             <Card key={playlist.playlist.id}>
               <CardHeader className="max-w-sm">
                 <AspectRatio ratio={16 / 9}>
-                  <Image
+                  <img
                     src={getThumbnailUrl(playlist.playlist?.snippet?.thumbnails)}
                     alt={playlist.playlist?.snippet?.title || 'Playlist thumbnail'}
                     className="w-full h-full object-cover"
@@ -106,7 +106,7 @@ export default function ChannelPlaylistsPage() {
                 {playlist.items?.map((item: any) => (
                   <div key={item.id} className="mb-4 w-full">
                     <AspectRatio ratio={16 / 9}>
-                      <Image
+                      <img
                         src={getThumbnailUrl(item?.snippet?.thumbnails)}
                         alt={item?.snippet?.title || 'Video thumbnail'}
                         className="w-full h-full object-cover"

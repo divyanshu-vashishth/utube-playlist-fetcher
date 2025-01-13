@@ -2,6 +2,7 @@ import { youtubeService } from '@/lib/googleAuth';
 import { savePlaylistsToDB } from '@/utils/db';
 
 export async function GET() {
+  try{
   const playlists = await youtubeService.playlists.list({
     part: ['snippet'],
     mine: true,
@@ -16,6 +17,12 @@ export async function GET() {
       return { playlist, items: items.data.items };
     }) || []
   );
-//   await savePlaylistsToDB(playlistItems);
+  await savePlaylistsToDB(playlistItems);
   return new Response(JSON.stringify(playlistItems));
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to fetch channel playlists' }, 
+      { status: 500 }
+    );
+  }
 }
