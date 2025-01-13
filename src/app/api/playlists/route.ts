@@ -1,5 +1,6 @@
 import { youtubeService } from '@/lib/googleAuth';
 import { savePlaylistsToDB } from '@/utils/db';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try{
@@ -18,7 +19,7 @@ export async function GET() {
     }) || []
   );
   await savePlaylistsToDB(playlistItems);
-  return new Response(JSON.stringify(playlistItems));
+  return NextResponse.json(playlistItems);
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch channel playlists' }, 
